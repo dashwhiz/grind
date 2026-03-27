@@ -62,6 +62,7 @@ export default function HomePage() {
                   key={i}
                   workout={w}
                   accentColor={C.green}
+                  badge="CUSTOM"
                   onPress={() => goToEdit(i)}
                 />
               ))}

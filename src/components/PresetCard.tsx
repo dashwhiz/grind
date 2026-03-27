@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import type { Workout } from '@/lib/types'
-import { TYPE_LABELS as TL } from '@/lib/types'
 import { totalSeconds as ts, formatDuration as fd } from '@/lib/utils'
 import { C } from '@/lib/colors'
 
@@ -25,13 +24,13 @@ function RepeatIcon({ color }: { color: string }) {
 interface Props {
   workout: Workout
   accentColor: string
+  badge?: string
   onPress: () => void
 }
 
-export default function PresetCard({ workout, accentColor, onPress }: Props) {
+export default function PresetCard({ workout, accentColor, badge, onPress }: Props) {
   const [hovered, setHovered] = useState(false)
   const total = ts(workout)
-  const label = TL[workout.type]
 
   return (
     <div
@@ -55,26 +54,21 @@ export default function PresetCard({ workout, accentColor, onPress }: Props) {
         transition: 'background 120ms, border-color 120ms',
       }}
     >
-      {/* Top row */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
         <span style={{ fontSize: 16, fontWeight: 600, color: C.text, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {workout.name}
         </span>
-        <span style={{
-          fontSize: 10,
-          fontWeight: 700,
-          letterSpacing: 0.5,
-          color: accentColor,
-          background: `${accentColor}22`,
-          borderRadius: 6,
-          padding: '3px 7px',
-          whiteSpace: 'nowrap',
-        }}>
-          {label}
-        </span>
+        {badge && (
+          <span style={{
+            fontSize: 10, fontWeight: 700, letterSpacing: 0.5,
+            color: accentColor, background: `${accentColor}22`,
+            borderRadius: 6, padding: '3px 7px', whiteSpace: 'nowrap',
+          }}>
+            {badge}
+          </span>
+        )}
       </div>
 
-      {/* Bottom row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <TimerIcon color={C.textMuted} />
         <span style={{ fontSize: 12, color: C.textMuted }}>{fd(total)}</span>

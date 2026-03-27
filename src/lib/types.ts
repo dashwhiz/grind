@@ -9,6 +9,7 @@ export interface Workout {
   segments: IntervalSegment[]
   rounds: number
   prepareSeconds: number
+  description?: string
 }
 
 export const SEGMENT_CONFIG = {

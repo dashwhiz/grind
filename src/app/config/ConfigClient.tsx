@@ -84,6 +84,9 @@ export default function ConfigClient() {
   const [rounds, setRounds] = useState(passedWorkout?.rounds ?? 3)
   const [saveChecked, setSaveChecked] = useState(true)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showInfo, setShowInfo] = useState(false)
+
+  const description = passedWorkout?.description ?? null
 
   const origRef = useRef({
     name: passedWorkout?.name ?? '',
@@ -221,8 +224,23 @@ export default function ConfigClient() {
           {/* Workout name */}
           {mode !== 'preset' && (
             <div>
-              <div style={{ fontSize: 12, fontWeight: 500, color: C.textMuted, letterSpacing: 0.5, marginBottom: 8 }}>
-                WORKOUT NAME
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                <div style={{ fontSize: 12, fontWeight: 500, color: C.textMuted, letterSpacing: 0.5 }}>
+                  WORKOUT NAME
+                </div>
+                {description && (
+                  <button
+                    onClick={() => setShowInfo(true)}
+                    style={{
+                      width: 20, height: 20, border: `1px solid ${C.border}`, borderRadius: '50%',
+                      background: 'none', color: C.textMuted, fontSize: 11, fontWeight: 700,
+                      cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+                    }}
+                    aria-label="Workout info"
+                  >
+                    i
+                  </button>
+                )}
               </div>
               <input
                 value={name}
@@ -244,8 +262,21 @@ export default function ConfigClient() {
           )}
 
           {mode === 'preset' && (
-            <div style={{ fontSize: 20, fontWeight: 700, color: C.text }}>
-              {name}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 20, fontWeight: 700, color: C.text }}>{name}</span>
+              {description && (
+                <button
+                  onClick={() => setShowInfo(true)}
+                  style={{
+                    width: 24, height: 24, border: `1px solid ${C.border}`, borderRadius: '50%',
+                    background: 'none', color: C.textMuted, fontSize: 13, fontWeight: 700,
+                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+                  }}
+                  aria-label="Workout info"
+                >
+                  i
+                </button>
+              )}
             </div>
           )}
 
@@ -388,6 +419,40 @@ export default function ConfigClient() {
           onConfirm={handleDeleteConfirm}
           onCancel={() => setShowDeleteConfirm(false)}
         />
+      )}
+
+      {showInfo && description && (
+        <div
+          onClick={() => setShowInfo(false)}
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.54)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 1000, padding: 16,
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              maxWidth: 360, width: '100%', padding: 24,
+              background: C.surface, borderRadius: 20, border: `1px solid ${C.border}`,
+              display: 'flex', flexDirection: 'column', gap: 12,
+            }}
+          >
+            <div style={{ fontSize: 16, fontWeight: 700, color: C.text }}>{name}</div>
+            <p style={{ fontSize: 14, color: C.textMuted, lineHeight: 1.5, margin: 0 }}>
+              {description}
+            </p>
+            <button
+              onClick={() => setShowInfo(false)}
+              style={{
+                height: 44, background: C.elevated, border: 'none', borderRadius: 12,
+                color: C.text, fontSize: 14, fontWeight: 600, cursor: 'pointer', marginTop: 4,
+              }}
+            >
+              GOT IT
+            </button>
+          </div>
+        </div>
       )}
     </div>
   )
