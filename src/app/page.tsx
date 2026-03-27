@@ -29,7 +29,7 @@ export default function HomePage() {
     <div className="full-screen safe-bottom" style={{ background: C.bg, padding: '0 16px 48px' }}>
       <div style={{ maxWidth: 700, margin: '0 auto', paddingTop: 64 }}>
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 8 }}>
           <GrindLogo />
           <button
             onClick={() => goToConfig()}
@@ -52,9 +52,7 @@ export default function HomePage() {
             +
           </button>
         </div>
-        <p style={{ fontSize: 14, color: C.textMuted, margin: '0 0 32px' }}>
-          Choose a workout or create your own
-        </p>
+        <div style={{ marginBottom: 32 }} />
 
         {/* User workouts */}
         {userWorkouts.length > 0 && (

@@ -15,6 +15,9 @@ export default function GrindLogo({ onClick }: Props) {
         <span style={{ color: C.orange }}>IND</span>
       </span>
       <div style={{ width: 36, height: 3, background: C.orange, borderRadius: 2 }} />
+      <span style={{ fontSize: 11, fontWeight: 600, color: C.textMuted, letterSpacing: 1.5, marginTop: 2 }}>
+        INTERVAL TIMER
+      </span>
     </>
   )
 
