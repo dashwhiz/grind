@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { Workout } from '@/lib/types'
+import { SEGMENT_CONFIG } from '@/lib/types'
 import { totalSeconds as ts, formatDuration as fd } from '@/lib/utils'
 import { C } from '@/lib/colors'
 
@@ -74,6 +75,19 @@ export default function PresetCard({ workout, accentColor, badge, onPress }: Pro
         <span style={{ fontSize: 12, color: C.textMuted }}>{fd(total)}</span>
         <RepeatIcon color={C.textMuted} />
         <span style={{ fontSize: 12, color: C.textMuted }}>{workout.rounds} rounds</span>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
+          {workout.segments.filter(s => s.type !== 'prepare').map((s, i) => (
+            <div
+              key={i}
+              style={{
+                width: 7,
+                height: 7,
+                borderRadius: '50%',
+                background: SEGMENT_CONFIG[s.type].color,
+              }}
+            />
+          ))}
+        </div>
       </div>
     </div>
   )
