@@ -293,13 +293,13 @@ export default function ConfigClient() {
               onClick={handleAddSegment}
               style={{
                 width: '100%',
-                height: 44,
+                padding: '14px 0',
                 marginTop: 8,
                 background: 'transparent',
                 border: `1.5px dashed ${C.border}`,
                 borderRadius: 12,
                 color: C.textMuted,
-                fontSize: 14,
+                fontSize: 13,
                 fontWeight: 600,
                 letterSpacing: 0.5,
                 cursor: 'pointer',
