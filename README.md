@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Interval Timer
 
-## Getting Started
+A CrossFit & HIIT interval timer built with Next.js. Clean, fast, and works great on mobile Safari.
 
-First, run the development server:
+## Features
+
+- **6 built-in presets** — Tabata Classic, EMOM 10, Quick HIIT, 30-20-10, Tabata Extended, AMRAP 12
+- **Custom workouts** — configure work/rest intervals, rounds, and prepare time, save to your list
+- **Full-screen timer** — phase colors (orange/teal/yellow), Orbitron countdown, smooth transitions
+- **Audio cues** — countdown ticks, phase transitions, completion melody via Web Audio API
+- **Safari-native** — proper toolbar tinting, `100dvh`, safe area insets, swipe-back navigation
+- **PWA** — installable on iPhone home screen
+
+## Pages
+
+| Route | Description |
+|-------|-------------|
+| `/` | Home — preset grid + your saved workouts |
+| `/config` | Configure a workout before starting |
+| `/timer` | Full-screen active countdown |
+| `/complete` | Workout finished screen |
+
+## Dev
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Build & Deploy
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Deployed to GitHub Pages via the Actions workflow on every push to `main`.
 
-## Learn More
+```bash
+npm run build   # produces out/
+```
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The `basePath` (`/interval-timer`) is only applied in production — dev runs at the root.
