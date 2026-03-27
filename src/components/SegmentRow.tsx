@@ -5,6 +5,19 @@ import { C } from '@/lib/colors'
 
 export type EditableSegment = { type: 'work' | 'rest'; durationSeconds: number; label?: string }
 
+const PLACEHOLDERS = [
+  'e.g. Rowing',
+  'e.g. Squats',
+  'e.g. Burpees',
+  'e.g. Plank',
+  'e.g. Sprints',
+  'e.g. Push-ups',
+  'e.g. Lunges',
+  'e.g. Curls',
+  'e.g. Jump rope',
+  'e.g. Deadlifts',
+]
+
 const STEP = 5
 const MIN = 5
 const MAX = 3600
@@ -87,7 +100,7 @@ export default function SegmentRow({ segment, index, canDelete, onChange, onDele
         <input
           value={segment.label ?? ''}
           onChange={e => onChange(index, { ...segment, label: e.target.value || undefined })}
-          placeholder="Add label..."
+          placeholder={PLACEHOLDERS[index % PLACEHOLDERS.length]}
           style={{
             flex: 1,
             minWidth: 0,
