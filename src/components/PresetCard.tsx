@@ -56,7 +56,12 @@ export default function PresetCard({ workout, accentColor, badge, onPress }: Pro
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-        <span style={{ fontSize: 16, fontWeight: 600, color: C.text, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <span style={{
+          fontSize: 16, fontWeight: 600, color: C.text, flex: 1,
+          overflow: 'hidden', textOverflow: 'ellipsis',
+          display: '-webkit-box',
+          WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+        }}>
           {workout.name}
         </span>
         {badge && (

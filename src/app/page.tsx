@@ -1,6 +1,14 @@
 'use client'
 
-import { useSyncExternalStore } from 'react'
+import { useCallback, useSyncExternalStore } from 'react'
+
+const PRESETS_KEY = 'grind-presets-visibility'
+function getPresetsSnapshot() { return localStorage.getItem(PRESETS_KEY) !== 'hide' }
+function getPresetsServerSnapshot() { return true }
+function subscribePresets(cb: () => void) {
+  window.addEventListener('storage', cb)
+  return () => window.removeEventListener('storage', cb)
+}
 import type React from 'react'
 import GrindLogo from '@/components/GrindLogo'
 import { useRouter } from 'next/navigation'
@@ -12,6 +20,12 @@ import { C } from '@/lib/colors'
 export default function HomePage() {
   const router = useRouter()
   const userWorkouts = useSyncExternalStore(subscribeWorkouts, getWorkoutsSnapshot, getWorkoutsServerSnapshot)
+  const presetsOpen = useSyncExternalStore(subscribePresets, getPresetsSnapshot, getPresetsServerSnapshot)
+
+  const togglePresets = useCallback(() => {
+    localStorage.setItem(PRESETS_KEY, presetsOpen ? 'hide' : 'show')
+    window.dispatchEvent(new Event('storage'))
+  }, [presetsOpen])
 
   function goToEdit(index: number) {
     router.push(`/config?edit=${index}`)
@@ -72,19 +86,49 @@ export default function HomePage() {
 
         {/* Presets */}
         <section>
-          <div style={{ fontSize: 13, fontWeight: 600, color: C.textMuted, letterSpacing: 0.5, marginBottom: 12 }}>
-            PRESETS
-          </div>
-          <WorkoutGrid>
-            {PRESETS.map((w, i) => (
-              <PresetCard
-                key={i}
-                workout={w}
-                accentColor={C.orange}
-                onPress={() => goToPreset(i)}
-              />
-            ))}
-          </WorkoutGrid>
+          <button
+            onClick={togglePresets}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              width: '100%',
+              background: 'none',
+              border: 'none',
+              padding: '8px 0',
+              marginBottom: 4,
+              cursor: 'pointer',
+              userSelect: 'none',
+            }}
+          >
+            <span style={{ fontSize: 13, fontWeight: 600, color: C.textMuted, letterSpacing: 0.5 }}>
+              PRESETS
+            </span>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill={C.textMuted}
+              style={{
+                transition: 'transform 250ms ease',
+                transform: presetsOpen ? 'rotate(0deg)' : 'rotate(-180deg)',
+              }}
+            >
+              <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/>
+            </svg>
+          </button>
+          {presetsOpen && (
+            <WorkoutGrid>
+              {PRESETS.map((w, i) => (
+                <PresetCard
+                  key={i}
+                  workout={w}
+                  accentColor={C.orange}
+                  onPress={() => goToPreset(i)}
+                />
+              ))}
+            </WorkoutGrid>
+          )}
         </section>
       </div>
     </div>
