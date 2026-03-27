@@ -1,9 +1,11 @@
 import type { NextConfig } from "next";
 
+const isProd = process.env.NODE_ENV === "production";
+
 const nextConfig: NextConfig = {
   output: "export",
-  basePath: "/interval-timer",
-  assetPrefix: "/interval-timer/",
+  basePath: isProd ? "/interval-timer" : "",
+  assetPrefix: isProd ? "/interval-timer/" : "",
   images: { unoptimized: true },
 };
 

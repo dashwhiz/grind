@@ -1,65 +1,144 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import { useState, useSyncExternalStore } from 'react'
+import { useRouter } from 'next/navigation'
+import PresetCard from '@/components/PresetCard'
+import ConfirmDialog from '@/components/ConfirmDialog'
+import { PRESETS } from '@/lib/presets'
+import { deleteWorkout, getWorkoutsSnapshot, getWorkoutsServerSnapshot, subscribeWorkouts } from '@/lib/storage'
+import { encodeWorkout } from '@/lib/utils'
+import type { Workout } from '@/lib/types'
+
+function DeleteIcon() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(231,76,60,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="#E74C3C">
+        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+      </svg>
     </div>
-  );
+  )
+}
+
+export default function HomePage() {
+  const router = useRouter()
+  const userWorkouts = useSyncExternalStore(subscribeWorkouts, getWorkoutsSnapshot, getWorkoutsServerSnapshot)
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null)
+
+  function goToConfig(workout?: Workout, editIndex?: number) {
+    if (workout) {
+      let url = `/config?w=${encodeWorkout(workout)}`
+      if (editIndex !== undefined) url += `&editIndex=${editIndex}`
+      router.push(url)
+    } else {
+      router.push('/config')
+    }
+  }
+
+  function handleDeleteConfirm() {
+    if (deleteTarget === null) return
+    deleteWorkout(deleteTarget)
+    setDeleteTarget(null)
+  }
+
+  const deleteTargetWorkout = deleteTarget !== null ? userWorkouts[deleteTarget] : null
+
+  return (
+    <div className="full-screen safe-bottom" style={{ background: '#0F0F0F', padding: '0 16px 48px' }}>
+      <div style={{ maxWidth: 700, margin: '0 auto', paddingTop: 64 }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: -0.5, color: '#F5F5F5', margin: 0 }}>
+            INTERVAL TIMER
+          </h1>
+          <button
+            onClick={() => goToConfig()}
+            style={{
+              width: 40,
+              height: 40,
+              background: '#2ECC71',
+              border: 'none',
+              borderRadius: 12,
+              color: '#fff',
+              fontSize: 22,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+            aria-label="New workout"
+          >
+            +
+          </button>
+        </div>
+        <p style={{ fontSize: 14, color: '#888888', margin: '0 0 32px' }}>
+          Choose a workout or create your own
+        </p>
+
+        {/* User workouts */}
+        {userWorkouts.length > 0 && (
+          <section style={{ marginBottom: 32 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#888888', letterSpacing: 0.5, marginBottom: 12 }}>
+              YOUR WORKOUTS
+            </div>
+            <WorkoutGrid>
+              {userWorkouts.map((w, i) => (
+                <PresetCard
+                  key={i}
+                  workout={w}
+                  accentColor="#2ECC71"
+                  showDelete
+                  onPress={() => goToConfig(w, i)}
+                  onDelete={() => setDeleteTarget(i)}
+                />
+              ))}
+            </WorkoutGrid>
+          </section>
+        )}
+
+        {/* Presets */}
+        <section>
+          <div style={{ fontSize: 13, fontWeight: 600, color: '#888888', letterSpacing: 0.5, marginBottom: 12 }}>
+            PRESETS
+          </div>
+          <WorkoutGrid>
+            {PRESETS.map((w, i) => (
+              <PresetCard
+                key={i}
+                workout={w}
+                accentColor="#FF6B35"
+                onPress={() => goToConfig(w)}
+              />
+            ))}
+          </WorkoutGrid>
+        </section>
+      </div>
+
+      {/* Delete confirmation */}
+      {deleteTarget !== null && deleteTargetWorkout && (
+        <ConfirmDialog
+          title="Delete Workout?"
+          message={`"${deleteTargetWorkout.name}" will be removed from your saved workouts.`}
+          confirmLabel="DELETE"
+          confirmColor="#E74C3C"
+          cancelLabel="KEEP"
+          icon={<DeleteIcon />}
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
+    </div>
+  )
+}
+
+function WorkoutGrid({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+      gap: 10,
+    }}>
+      {children}
+    </div>
+  )
 }

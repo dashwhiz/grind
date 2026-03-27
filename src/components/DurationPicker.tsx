@@ -1,0 +1,76 @@
+'use client'
+
+import { formatDuration } from '@/lib/utils'
+
+interface Props {
+  label: string
+  value: number
+  step: number
+  min: number
+  max: number
+  onChange: (value: number) => void
+}
+
+export default function DurationPicker({ label, value, step, min, max, onChange }: Props) {
+  const atMin = value <= min
+  const atMax = value >= max
+
+  const btnStyle = (disabled: boolean): React.CSSProperties => ({
+    width: 40,
+    height: 40,
+    border: 'none',
+    background: 'none',
+    color: disabled ? 'rgba(136,136,136,0.3)' : '#F5F5F5',
+    fontSize: 24,
+    cursor: disabled ? 'default' : 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    borderRadius: 8,
+    transition: 'color 120ms',
+  })
+
+  return (
+    <div>
+      <div style={{ fontSize: 12, fontWeight: 500, color: '#888888', letterSpacing: 0.5, marginBottom: 8 }}>
+        {label}
+      </div>
+      <div style={{
+        background: '#1A1A1A',
+        borderRadius: 12,
+        padding: '4px 8px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}>
+        <button
+          style={btnStyle(atMin)}
+          disabled={atMin}
+          onClick={() => onChange(Math.max(min, value - step))}
+          aria-label="Decrease"
+        >
+          −
+        </button>
+        <span style={{
+          width: 72,
+          textAlign: 'center',
+          fontFamily: 'var(--font-roboto-mono)',
+          fontSize: 16,
+          fontWeight: 600,
+          color: '#F5F5F5',
+        }}>
+          {formatDuration(value)}
+        </span>
+        <button
+          style={btnStyle(atMax)}
+          disabled={atMax}
+          onClick={() => onChange(Math.min(max, value + step))}
+          aria-label="Increase"
+        >
+          +
+        </button>
+      </div>
+    </div>
+  )
+}
