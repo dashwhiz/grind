@@ -1,6 +1,7 @@
 export interface IntervalSegment {
   type: 'work' | 'rest' | 'prepare'
   durationSeconds: number
+  label?: string
 }
 
 export interface Workout {

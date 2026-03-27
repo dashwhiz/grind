@@ -3,7 +3,7 @@
 import { formatDuration } from '@/lib/utils'
 import { C } from '@/lib/colors'
 
-export type EditableSegment = { type: 'work' | 'rest'; durationSeconds: number }
+export type EditableSegment = { type: 'work' | 'rest'; durationSeconds: number; label?: string }
 
 const STEP = 5
 const MIN = 5
@@ -29,7 +29,7 @@ export default function SegmentRow({ segment, index, canDelete, onChange, onDele
 
   function toggleType() {
     const newType = segment.type === 'work' ? 'rest' : 'work'
-    onChange(index, { ...segment, type: newType })
+    onChange(index, { ...segment, type: newType, label: newType === 'rest' ? undefined : segment.label })
   }
 
   function changeDuration(delta: number) {
@@ -82,8 +82,31 @@ export default function SegmentRow({ segment, index, canDelete, onChange, onDele
         {ts.label}
       </button>
 
+      {/* Label (work only) */}
+      {segment.type === 'work' ? (
+        <input
+          value={segment.label ?? ''}
+          onChange={e => onChange(index, { ...segment, label: e.target.value || undefined })}
+          placeholder="Add label..."
+          style={{
+            flex: 1,
+            minWidth: 0,
+            background: 'none',
+            border: 'none',
+            outline: 'none',
+            color: C.text,
+            fontSize: 13,
+            fontWeight: 500,
+            fontFamily: 'inherit',
+            padding: '4px 0',
+          }}
+        />
+      ) : (
+        <div style={{ flex: 1 }} />
+      )}
+
       {/* Duration controls */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
         <button style={smallBtn(atMin)} disabled={atMin} onClick={() => changeDuration(-STEP)} aria-label="Decrease">
           −
         </button>

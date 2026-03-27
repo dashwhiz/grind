@@ -48,7 +48,7 @@ const DEFAULT_SEGMENTS: EditableSegment[] = [
 function normalizeSegments(segments: IntervalSegment[]): EditableSegment[] {
   const result = segments
     .filter(s => s.type !== 'prepare')
-    .map(s => ({ type: s.type as 'work' | 'rest', durationSeconds: s.durationSeconds }))
+    .map(s => ({ type: s.type as 'work' | 'rest', durationSeconds: s.durationSeconds, label: s.label }))
   return result.length > 0 ? result : DEFAULT_SEGMENTS
 }
 
@@ -108,7 +108,7 @@ export default function ConfigClient() {
     return {
       name,
       type: 'custom',
-      segments: segments.map(s => ({ type: s.type, durationSeconds: s.durationSeconds })),
+      segments: segments.map(s => ({ type: s.type, durationSeconds: s.durationSeconds, ...(s.label ? { label: s.label } : {}) })),
       rounds,
       prepareSeconds: 10,
     }

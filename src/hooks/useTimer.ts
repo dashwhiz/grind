@@ -145,7 +145,7 @@ export function useTimer(
     totalRounds,
     segmentColor: config.color,
     segmentTextColor: config.textColor,
-    segmentLabel: config.label,
+    segmentLabel: currentSegment?.label || config.label,
     play,
     pause,
     reset,
