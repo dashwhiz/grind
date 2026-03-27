@@ -148,24 +148,31 @@ export default function ConfigClient() {
     paddingRight: 16,
   }
 
-  const iconBtnStyle: React.CSSProperties = {
-    width: 56,
-    height: 56,
-    background: `${C.red}1F`,
-    border: 'none',
-    borderRadius: 16,
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  }
-
   return (
     <div className="full-screen safe-bottom" style={{ background: C.bg, padding: '0 16px 48px' }}>
       <div style={{ maxWidth: 500, margin: '0 auto', paddingTop: 64 }}>
-        <div style={{ marginBottom: 32 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
           <GrindLogo onClick={() => router.push('/')} />
+          {mode === 'edit' && (
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              style={{
+                width: 40,
+                height: 40,
+                background: `${C.red}1F`,
+                border: 'none',
+                borderRadius: 12,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+              aria-label="Delete workout"
+            >
+              <TrashIcon />
+            </button>
+          )}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
@@ -238,7 +245,6 @@ export default function ConfigClient() {
             <div style={{
               background: C.surface,
               borderRadius: 12,
-              border: `1px solid ${C.border}`,
               padding: 16,
               display: 'flex',
               alignItems: 'center',
@@ -298,9 +304,6 @@ export default function ConfigClient() {
 
             {mode === 'edit' && (
               <div style={{ display: 'flex', gap: 12 }}>
-                <button style={iconBtnStyle} onClick={() => setShowDeleteConfirm(true)} aria-label="Delete workout">
-                  <TrashIcon />
-                </button>
                 <button style={outlinedBtnStyle(!hasChanges)} disabled={!hasChanges} onClick={handleUpdate}>
                   UPDATE
                 </button>
