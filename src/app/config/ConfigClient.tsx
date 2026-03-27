@@ -145,6 +145,16 @@ export default function ConfigClient() {
     setSegments(prev => prev.filter((_, i) => i !== index))
   }
 
+  function handleSegmentMove(index: number, direction: -1 | 1) {
+    setSegments(prev => {
+      const next = [...prev]
+      const target = index + direction
+      if (target < 0 || target >= next.length) return prev
+      ;[next[index], next[target]] = [next[target], next[index]]
+      return next
+    })
+  }
+
   function handleAddSegment() {
     setSegments(prev => [...prev, { type: 'work', durationSeconds: 30 }])
   }
@@ -252,9 +262,11 @@ export default function ConfigClient() {
                   key={i}
                   segment={seg}
                   index={i}
+                  total={segments.length}
                   canDelete={segments.length > 1}
                   onChange={handleSegmentChange}
                   onDelete={handleSegmentDelete}
+                  onMove={handleSegmentMove}
                 />
               ))}
             </div>

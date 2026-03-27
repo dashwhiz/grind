@@ -17,15 +17,19 @@ const TYPE_STYLES = {
 interface Props {
   segment: EditableSegment
   index: number
+  total: number
   canDelete: boolean
   onChange: (index: number, updated: EditableSegment) => void
   onDelete: (index: number) => void
+  onMove: (index: number, direction: -1 | 1) => void
 }
 
-export default function SegmentRow({ segment, index, canDelete, onChange, onDelete }: Props) {
+export default function SegmentRow({ segment, index, total, canDelete, onChange, onDelete, onMove }: Props) {
   const ts = TYPE_STYLES[segment.type]
   const atMin = segment.durationSeconds <= MIN
   const atMax = segment.durationSeconds >= MAX
+  const isFirst = index === 0
+  const isLast = index === total - 1
 
   function toggleType() {
     const newType = segment.type === 'work' ? 'rest' : 'work'
@@ -52,6 +56,21 @@ export default function SegmentRow({ segment, index, canDelete, onChange, onDele
     borderRadius: 6,
   })
 
+  const arrowBtn = (disabled: boolean): React.CSSProperties => ({
+    width: 28,
+    height: 22,
+    border: 'none',
+    background: 'none',
+    color: disabled ? `${C.textMuted}33` : C.textMuted,
+    fontSize: 9,
+    cursor: disabled ? 'default' : 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 0,
+    lineHeight: 1,
+  })
+
   return (
     <div style={{
       background: C.surface,
@@ -62,6 +81,16 @@ export default function SegmentRow({ segment, index, canDelete, onChange, onDele
       alignItems: 'center',
       gap: 8,
     }}>
+      {/* Move arrows */}
+      <div style={{ display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+        <button style={arrowBtn(isFirst)} disabled={isFirst} onClick={() => onMove(index, -1)} aria-label="Move up">
+          ▲
+        </button>
+        <button style={arrowBtn(isLast)} disabled={isLast} onClick={() => onMove(index, 1)} aria-label="Move down">
+          ▼
+        </button>
+      </div>
+
       {/* Type badge */}
       <button
         onClick={toggleType}
@@ -107,19 +136,18 @@ export default function SegmentRow({ segment, index, canDelete, onChange, onDele
         onClick={() => onDelete(index)}
         disabled={!canDelete}
         style={{
-          width: 32,
-          height: 32,
+          width: 24,
+          height: 24,
           border: 'none',
-          background: canDelete ? `${C.red}1F` : 'transparent',
-          borderRadius: 8,
-          color: C.red,
-          fontSize: 16,
+          background: 'none',
+          color: canDelete ? C.textMuted : `${C.textMuted}33`,
+          fontSize: 15,
           cursor: canDelete ? 'pointer' : 'default',
-          opacity: canDelete ? 1 : 0.25,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           flexShrink: 0,
+          padding: 0,
         }}
         aria-label="Remove interval"
       >
