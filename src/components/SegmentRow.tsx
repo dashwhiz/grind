@@ -22,9 +22,9 @@ const STEP = 5
 const MIN = 5
 const MAX = 3600
 
-const TYPE_STYLES = {
-  work: { bg: `${C.orange}33`, color: C.orange, label: 'WORK' },
-  rest: { bg: '#4ECDC433', color: '#4ECDC4', label: 'REST' },
+const TYPE_COLORS = {
+  work: C.orange,
+  rest: '#4ECDC4',
 } as const
 
 interface Props {
@@ -36,7 +36,7 @@ interface Props {
 }
 
 export default function SegmentRow({ segment, index, canDelete, onChange, onDelete }: Props) {
-  const ts = TYPE_STYLES[segment.type]
+  const color = TYPE_COLORS[segment.type]
   const atMin = segment.durationSeconds <= MIN
   const atMax = segment.durationSeconds >= MAX
 
@@ -66,57 +66,45 @@ export default function SegmentRow({ segment, index, canDelete, onChange, onDele
   })
 
   return (
-    <div style={{
-      background: C.surface,
-      border: `1px solid ${C.border}`,
-      borderRadius: 12,
-      padding: '6px 10px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: 8,
-    }}>
-      {/* Type badge */}
-      <button
-        onClick={toggleType}
-        style={{
-          background: ts.bg,
-          color: ts.color,
-          border: 'none',
-          borderRadius: 6,
-          padding: '4px 8px',
-          fontSize: 10,
-          fontWeight: 700,
-          letterSpacing: 0.5,
-          cursor: 'pointer',
-          flexShrink: 0,
-          userSelect: 'none',
-        }}
-      >
-        {ts.label}
-      </button>
-
-      {/* Label (work only) */}
-      {segment.type === 'work' ? (
-        <input
-          value={segment.label ?? ''}
-          onChange={e => onChange(index, { ...segment, label: e.target.value || undefined })}
-          placeholder={PLACEHOLDERS[index % PLACEHOLDERS.length]}
-          style={{
-            flex: 1,
-            minWidth: 0,
-            background: 'none',
-            border: 'none',
-            outline: 'none',
-            color: C.text,
-            fontSize: 16,
-            fontWeight: 500,
-            fontFamily: 'inherit',
-            padding: '4px 0',
-          }}
-        />
-      ) : (
-        <div style={{ flex: 1 }} />
-      )}
+    <div
+      style={{
+        background: C.surface,
+        border: `1px solid ${C.border}`,
+        borderRadius: 12,
+        borderLeft: `3px solid ${color}`,
+        padding: '8px 10px 8px 12px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        cursor: 'pointer',
+      }}
+    >
+      {/* Left: type toggle + label */}
+      <div onClick={toggleType} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color, userSelect: 'none' }}>
+          {segment.type === 'work' ? 'WORK' : 'REST'}
+        </span>
+        {segment.type === 'work' ? (
+          <input
+            value={segment.label ?? ''}
+            onChange={e => onChange(index, { ...segment, label: e.target.value || undefined })}
+            onClick={e => e.stopPropagation()}
+            placeholder={PLACEHOLDERS[index % PLACEHOLDERS.length]}
+            style={{
+              width: '100%',
+              minWidth: 0,
+              background: 'none',
+              border: 'none',
+              outline: 'none',
+              color: C.text,
+              fontSize: 16,
+              fontWeight: 500,
+              fontFamily: 'inherit',
+              padding: 0,
+            }}
+          />
+        ) : null}
+      </div>
 
       {/* Duration controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
@@ -138,13 +126,16 @@ export default function SegmentRow({ segment, index, canDelete, onChange, onDele
         </button>
       </div>
 
+      {/* Divider */}
+      <div style={{ width: 1, height: 24, background: C.border, flexShrink: 0 }} />
+
       {/* Delete */}
       <button
         onClick={() => onDelete(index)}
         disabled={!canDelete}
         style={{
-          width: 24,
-          height: 24,
+          width: 28,
+          height: 28,
           border: 'none',
           background: 'none',
           color: canDelete ? C.textMuted : `${C.textMuted}33`,
