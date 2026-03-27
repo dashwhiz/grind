@@ -16,7 +16,7 @@ export function formatTime(seconds: number): string {
 
 export function totalSeconds(workout: Workout): number {
   const segmentTotal = workout.segments.reduce((sum, s) => sum + s.durationSeconds, 0)
-  return workout.prepareSeconds + segmentTotal * workout.rounds
+  return segmentTotal * workout.rounds
 }
 
 export function fullSequence(workout: Workout): IntervalSegment[] {
