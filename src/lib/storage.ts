@@ -46,6 +46,7 @@ export function updateWorkout(index: number, workout: Workout): void {
 
 export function deleteWorkout(index: number): void {
   const workouts = loadWorkouts()
+  if (index < 0 || index >= workouts.length) return
   workouts.splice(index, 1)
   persistWorkouts([...workouts])
 }

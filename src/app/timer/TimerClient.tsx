@@ -103,6 +103,15 @@ export default function TimerClient() {
     return () => { setThemeColor(C.bg) }
   }, [])
 
+  // Keep screen awake during workout
+  useEffect(() => {
+    let wakeLock: WakeLockSentinel | null = null
+    if (status === 'running') {
+      navigator.wakeLock?.request('screen').then(wl => { wakeLock = wl }).catch(() => {})
+    }
+    return () => { wakeLock?.release().catch(() => {}) }
+  }, [status])
+
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.code === 'Space') {

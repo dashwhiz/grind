@@ -33,6 +33,7 @@ export default function GrindLogo({ onClick }: Props) {
     return (
       <button
         onClick={onClick}
+        aria-label="Go home"
         style={{ ...baseStyle, background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
       >
         {inner}

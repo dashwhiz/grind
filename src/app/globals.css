@@ -1,18 +1,5 @@
-@import "tailwindcss";
-
 :root {
   color-scheme: dark;
-  --background:     #0d1117;
-  --surface:        #161b22;
-  --surface-light:  #21262d;
-  --border:         #30363d;
-  --work-color:     #f0883e;
-  --rest-color:     #4ECDC4;
-  --prepare-color:  #e3b341;
-  --text-primary:   #e6edf3;
-  --text-secondary: #7d8590;
-  --start-green:    #3fb950;
-  --stop-red:       #f85149;
 }
 
 html, body {
@@ -40,4 +27,3 @@ html {
 
 .safe-top    { padding-top:    env(safe-area-inset-top); }
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
-

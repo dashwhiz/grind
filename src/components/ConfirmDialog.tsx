@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { C } from '@/lib/colors'
 
 interface Props {
@@ -23,8 +24,18 @@ export default function ConfirmDialog({
   onConfirm,
   onCancel,
 }: Props) {
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onCancel()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onCancel])
+
   return (
     <div
+      role="dialog"
+      aria-modal="true"
       style={{
         position: 'fixed',
         inset: 0,

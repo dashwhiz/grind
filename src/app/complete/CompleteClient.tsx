@@ -12,7 +12,7 @@ export default function CompleteClient() {
   useEffect(() => { router.prefetch('/') }, [router])
 
   const name = searchParams.get('name') ?? ''
-  const elapsed = parseInt(searchParams.get('elapsed') ?? '0')
+  const elapsed = parseInt(searchParams.get('elapsed') ?? '0') || 0
 
   return (
     <div className="full-screen safe-top safe-bottom" style={{

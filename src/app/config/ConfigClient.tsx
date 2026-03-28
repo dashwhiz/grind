@@ -84,6 +84,7 @@ export default function ConfigClient() {
   const [saveChecked, setSaveChecked] = useState(true)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showInfo, setShowInfo] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   const description = passedWorkout?.description ?? null
 
@@ -139,16 +140,20 @@ export default function ConfigClient() {
 
   async function handleShare() {
     const workout = buildWorkoutFromState()
-    const base = typeof window !== 'undefined' ? window.location.origin + (window.location.pathname.replace(/\/config.*/, '') || '') : ''
-    const url = `${base}/config?share=${encodeWorkout(workout)}`
+    const shareUrl = new URL('/config', window.location.href)
+    shareUrl.search = `?share=${encodeWorkout(workout)}`
+    const url = shareUrl.toString()
 
     if (navigator.share) {
       try {
         await navigator.share({ title: workout.name, text: `Check out my workout: ${workout.name}`, url })
       } catch { /* user cancelled */ }
     } else {
-      await navigator.clipboard.writeText(url)
-      alert('Link copied to clipboard!')
+      try {
+        await navigator.clipboard.writeText(url)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      } catch { /* clipboard denied */ }
     }
   }
 
@@ -230,6 +235,17 @@ export default function ConfigClient() {
             </button>
           </div>
         </div>
+        {copied && (
+          <div style={{
+            textAlign: 'center',
+            fontSize: 13,
+            fontWeight: 600,
+            color: C.green,
+            padding: '8px 0',
+          }}>
+            Link copied!
+          </div>
+        )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
           {/* Workout name */}
