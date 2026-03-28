@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import RoundsPicker from '@/components/RoundsPicker'
 import SegmentRow from '@/components/SegmentRow'
@@ -87,16 +87,14 @@ export default function ConfigClient() {
 
   const description = passedWorkout?.description ?? null
 
-  const origRef = useRef({
-    name: passedWorkout?.name ?? '',
-    segJson: JSON.stringify(initialSegments),
-    rounds: passedWorkout?.rounds ?? 3,
-  })
+  const origName = passedWorkout?.name ?? ''
+  const origSegJson = useMemo(() => JSON.stringify(initialSegments), [initialSegments])
+  const origRounds = passedWorkout?.rounds ?? 3
 
   const hasChanges =
-    name !== origRef.current.name ||
-    JSON.stringify(segments) !== origRef.current.segJson ||
-    rounds !== origRef.current.rounds
+    name !== origName ||
+    JSON.stringify(segments) !== origSegJson ||
+    rounds !== origRounds
 
   const total = useMemo(
     () => segments.reduce((s, seg) => s + seg.durationSeconds, 0) * rounds,
