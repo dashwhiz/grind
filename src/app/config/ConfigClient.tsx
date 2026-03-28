@@ -7,7 +7,7 @@ import SegmentRow from '@/components/SegmentRow'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import GrindLogo from '@/components/GrindLogo'
 import type { EditableSegment } from '@/components/SegmentRow'
-import { formatDuration } from '@/lib/utils'
+import { formatDuration, encodeWorkout, decodeWorkout } from '@/lib/utils'
 import { addWorkout, updateWorkout, deleteWorkout, loadWorkouts } from '@/lib/storage'
 import { PRESETS } from '@/lib/presets'
 import { initAudio } from '@/lib/audio'
@@ -59,6 +59,12 @@ function resolveWorkout(searchParams: URLSearchParams): { workout: Workout | nul
     return { workout: PRESETS[idx] ?? null, editIndex: null }
   }
 
+  const shareParam = searchParams.get('share')
+  if (shareParam !== null) {
+    const workout = decodeWorkout(shareParam)
+    return { workout, editIndex: null }
+  }
+
   return { workout: null, editIndex: null }
 }
 
@@ -67,7 +73,8 @@ export default function ConfigClient() {
   const searchParams = useSearchParams()
 
   const { workout: passedWorkout, editIndex } = resolveWorkout(searchParams)
-  const mode: 'new' | 'edit' | 'preset' = !passedWorkout ? 'new' : editIndex !== null ? 'edit' : 'preset'
+  const isShare = searchParams.get('share') !== null
+  const mode: 'new' | 'edit' | 'preset' = !passedWorkout ? 'new' : isShare ? 'new' : editIndex !== null ? 'edit' : 'preset'
 
   const initialSegments = passedWorkout ? normalizeSegments(passedWorkout.segments) : DEFAULT_SEGMENTS
 
@@ -132,6 +139,21 @@ export default function ConfigClient() {
     router.replace('/')
   }
 
+  async function handleShare() {
+    const workout = buildWorkoutFromState()
+    const base = typeof window !== 'undefined' ? window.location.origin + (window.location.pathname.replace(/\/config.*/, '') || '') : ''
+    const url = `${base}/config?share=${encodeWorkout(workout)}`
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: workout.name, text: `Check out my workout: ${workout.name}`, url })
+      } catch { /* user cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(url)
+      alert('Link copied to clipboard!')
+    }
+  }
+
   function handleSegmentChange(index: number, updated: EditableSegment) {
     setSegments(prev => prev.map((s, i) => i === index ? updated : s))
   }
@@ -165,26 +187,50 @@ export default function ConfigClient() {
         {/* Header: logo + start button */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32 }}>
           <GrindLogo onClick={() => router.push('/')} />
-          <button
-            onClick={handleStart}
-            style={{
-              width: 40,
-              height: 40,
-              background: C.green,
-              border: 'none',
-              borderRadius: 12,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-            }}
-            aria-label="Start workout"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {mode === 'edit' && (
+              <button
+                onClick={handleShare}
+                style={{
+                  width: 40,
+                  height: 40,
+                  background: C.surface,
+                  border: `1px solid ${C.border}`,
+                  borderRadius: 12,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+                aria-label="Share workout"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill={C.textMuted}>
+                  <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/>
+                </svg>
+              </button>
+            )}
+            <button
+              onClick={handleStart}
+              style={{
+                width: 40,
+                height: 40,
+                background: C.green,
+                border: 'none',
+                borderRadius: 12,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+              aria-label="Start workout"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </button>
+          </div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
