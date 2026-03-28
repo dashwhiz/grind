@@ -180,39 +180,41 @@ export default function TimerClient() {
       paddingRight: 24,
       transition: 'background 500ms ease-in-out',
     }}>
-      {/* Top: phase label + round */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+      {/* Top: round info */}
+      <div style={{
+        fontSize: 14,
+        fontWeight: 500,
+        color: `${textColor}77`,
+        letterSpacing: 1,
+        minHeight: 20,
+      }}>
+        {round > 0 ? `ROUND ${round} / ${totalRounds}` : ''}
+      </div>
+
+      {/* Center: label + timer as one block */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
         <div style={{
-          fontSize: 28,
+          fontSize: 'clamp(24px, 7vw, 44px)',
           fontWeight: 800,
           letterSpacing: 3,
           color: `${textColor}CC`,
+          textAlign: 'center',
+          textTransform: 'uppercase',
         }}>
           {segmentLabel}
         </div>
-        {round > 0 && (
-          <div style={{
-            fontSize: 16,
-            fontWeight: 500,
-            color: `${textColor}99`,
-          }}>
-            Round {round} / {totalRounds}
-          </div>
-        )}
-      </div>
-
-      {/* Timer display */}
-      <div style={{
-        fontFamily: 'var(--font-orbitron)',
-        fontSize: 'clamp(64px, 22vw, 200px)',
-        fontWeight: 700,
-        color: textColor,
-        textShadow: '0 4px 20px rgba(0,0,0,0.2)',
-        letterSpacing: '-2px',
-        lineHeight: 1,
-        textAlign: 'center',
-      }}>
-        {formatTime(secondsLeft)}
+        <div style={{
+          fontFamily: 'var(--font-orbitron)',
+          fontSize: 'clamp(64px, 22vw, 200px)',
+          fontWeight: 700,
+          color: textColor,
+          textShadow: '0 4px 20px rgba(0,0,0,0.2)',
+          letterSpacing: '-2px',
+          lineHeight: 1,
+          textAlign: 'center',
+        }}>
+          {formatTime(secondsLeft)}
+        </div>
       </div>
 
       {/* Controls */}
