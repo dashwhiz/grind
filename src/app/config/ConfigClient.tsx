@@ -22,14 +22,6 @@ function TimerIcon() {
   )
 }
 
-function TrashIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill={C.red}>
-      <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-    </svg>
-  )
-}
-
 function DeleteIcon() {
   return (
     <div style={{ width: 56, height: 56, borderRadius: '50%', background: `${C.red}1F`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -124,19 +116,20 @@ export default function ConfigClient() {
 
   function handleSaveOnly() {
     addWorkout(buildWorkoutFromState())
-    router.push('/')
+    router.replace('/')
   }
 
   function handleUpdate() {
     if (editIndex === null) return
     updateWorkout(editIndex, buildWorkoutFromState())
-    router.back()
+    router.replace('/')
   }
 
   function handleDeleteConfirm() {
     if (editIndex === null) return
     deleteWorkout(editIndex)
-    router.push('/')
+    setShowDeleteConfirm(false)
+    router.replace('/')
   }
 
   function handleSegmentChange(index: number, updated: EditableSegment) {
@@ -153,7 +146,7 @@ export default function ConfigClient() {
   }
 
   const outlinedBtnStyle = (disabled: boolean): React.CSSProperties => ({
-    flex: 1,
+    width: '100%',
     height: 56,
     background: 'transparent',
     border: `1.5px solid ${disabled ? C.elevated : C.green}`,
@@ -163,51 +156,35 @@ export default function ConfigClient() {
     fontWeight: 700,
     letterSpacing: 1,
     cursor: disabled ? 'default' : 'pointer',
-    paddingLeft: 16,
-    paddingRight: 16,
     transition: 'border-color 120ms, color 120ms',
   })
-
-  const filledBtnStyle: React.CSSProperties = {
-    flex: 1,
-    height: 56,
-    background: C.green,
-    border: 'none',
-    borderRadius: 16,
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: 700,
-    letterSpacing: 2,
-    cursor: 'pointer',
-    paddingLeft: 16,
-    paddingRight: 16,
-  }
 
   return (
     <div className="full-screen safe-bottom" style={{ background: C.bg, padding: '0 16px 48px' }}>
       <div style={{ maxWidth: 500, margin: '0 auto', paddingTop: 64 }}>
+        {/* Header: logo + start button */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32 }}>
           <GrindLogo onClick={() => router.push('/')} />
-          {mode === 'edit' && (
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              style={{
-                width: 40,
-                height: 40,
-                background: `${C.red}1F`,
-                border: 'none',
-                borderRadius: 12,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-              aria-label="Delete workout"
-            >
-              <TrashIcon />
-            </button>
-          )}
+          <button
+            onClick={handleStart}
+            style={{
+              width: 40,
+              height: 40,
+              background: C.green,
+              border: 'none',
+              borderRadius: 12,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+            aria-label="Start workout"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          </button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
@@ -363,32 +340,35 @@ export default function ConfigClient() {
               </label>
             )}
 
-            {/* Buttons */}
+            {/* Action buttons */}
             {mode === 'new' && (
-              <div style={{ display: 'flex', gap: 12 }}>
-                <button style={outlinedBtnStyle(!saveChecked)} disabled={!saveChecked} onClick={handleSaveOnly}>
-                  SAVE ONLY
-                </button>
-                <button style={filledBtnStyle} onClick={handleStart}>
-                  START
-                </button>
-              </div>
+              <button style={outlinedBtnStyle(!saveChecked)} disabled={!saveChecked} onClick={handleSaveOnly}>
+                SAVE ONLY
+              </button>
             )}
 
             {mode === 'edit' && (
-              <div style={{ display: 'flex', gap: 12 }}>
-                <button style={outlinedBtnStyle(!hasChanges)} disabled={!hasChanges} onClick={handleUpdate}>
-                  UPDATE
-                </button>
-                <button style={filledBtnStyle} onClick={handleStart}>
-                  START
-                </button>
-              </div>
+              <button style={outlinedBtnStyle(!hasChanges)} disabled={!hasChanges} onClick={handleUpdate}>
+                UPDATE
+              </button>
             )}
 
-            {mode === 'preset' && (
-              <button style={{ ...filledBtnStyle, flex: 'unset', width: '100%' }} onClick={handleStart}>
-                START
+            {/* Delete (edit mode only) */}
+            {mode === 'edit' && (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: '12px 0',
+                  cursor: 'pointer',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: C.red,
+                  letterSpacing: 0.3,
+                }}
+              >
+                Delete workout
               </button>
             )}
           </div>

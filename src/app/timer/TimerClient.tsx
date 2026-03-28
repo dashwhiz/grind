@@ -130,7 +130,7 @@ export default function TimerClient() {
   function handleQuitConfirm() {
     setShowQuit(false)
     setThemeColor(C.bg)
-    router.push('/')
+    router.replace('/')
   }
 
   function handleQuitCancel() {
@@ -174,10 +174,10 @@ export default function TimerClient() {
       {/* Top: phase label + round */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
         <div style={{
-          fontSize: 20,
-          fontWeight: 700,
-          letterSpacing: 4,
-          color: `${textColor}B3`,
+          fontSize: 28,
+          fontWeight: 800,
+          letterSpacing: 3,
+          color: `${textColor}CC`,
         }}>
           {segmentLabel}
         </div>
