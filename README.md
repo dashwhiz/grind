@@ -2,7 +2,7 @@
 
 A customizable interval timer for workouts, focus, and more. Built with Next.js, designed for mobile.
 
-**Live:** [dashwhiz.github.io/grind](https://dashwhiz.github.io/grind)
+**Live:** [grind-timer.fit](https://grind-timer.fit)
 
 ## Features
 
@@ -56,4 +56,4 @@ Deployed to GitHub Pages via Actions on every push to `main`.
 npm run build   # produces out/
 ```
 
-The `basePath` (`/grind`) is only applied in production — dev runs at the root.
+Custom domain: `grind-timer.fit` — no basePath needed.
