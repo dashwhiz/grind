@@ -258,9 +258,9 @@ export default function TimerClient() {
         <ConfirmDialog
           title="Quit Workout?"
           message="Your progress will be lost."
-          confirmLabel="QUIT"
+          confirmLabel="Quit"
           confirmColor={C.red}
-          cancelLabel="KEEP GOING"
+          cancelLabel="Keep going"
           onConfirm={handleQuitConfirm}
           onCancel={handleQuitCancel}
         />

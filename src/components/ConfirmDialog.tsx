@@ -18,7 +18,7 @@ export default function ConfirmDialog({
   message,
   confirmLabel,
   confirmColor = C.red,
-  cancelLabel = 'CANCEL',
+  cancelLabel = 'Cancel',
   onConfirm,
   onCancel,
 }: Props) {
@@ -74,7 +74,7 @@ export default function ConfirmDialog({
               color: C.textMuted,
               fontSize: 13,
               fontWeight: 600,
-              letterSpacing: 0.5,
+              letterSpacing: 0.2,
               cursor: 'pointer',
             }}
           >
@@ -90,7 +90,7 @@ export default function ConfirmDialog({
               color: confirmColor,
               fontSize: 13,
               fontWeight: 600,
-              letterSpacing: 0.5,
+              letterSpacing: 0.2,
               cursor: 'pointer',
             }}
           >

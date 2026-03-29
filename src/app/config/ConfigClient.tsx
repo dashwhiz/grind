@@ -73,19 +73,20 @@ export default function ConfigClient() {
   const [rounds, setRounds] = useState(passedWorkout?.rounds ?? 3)
   const [saveChecked, setSaveChecked] = useState(true)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showSaveBeforeStart, setShowSaveBeforeStart] = useState(false)
   const [showInfo, setShowInfo] = useState(false)
   const [copied, setCopied] = useState(false)
 
   const description = passedWorkout?.description ?? null
 
-  const origName = passedWorkout?.name ?? ''
-  const origSegJson = useMemo(() => JSON.stringify(initialSegments), [initialSegments])
-  const origRounds = passedWorkout?.rounds ?? 3
+  const [savedName, setSavedName] = useState(passedWorkout?.name ?? '')
+  const [savedSegJson, setSavedSegJson] = useState(() => JSON.stringify(initialSegments))
+  const [savedRounds, setSavedRounds] = useState(passedWorkout?.rounds ?? 3)
 
   const hasChanges =
-    name !== origName ||
-    JSON.stringify(segments) !== origSegJson ||
-    rounds !== origRounds
+    name !== savedName ||
+    JSON.stringify(segments) !== savedSegJson ||
+    rounds !== savedRounds
 
   const total = useMemo(
     () => segments.reduce((s, seg) => s + seg.durationSeconds, 0) * rounds,
@@ -103,8 +104,17 @@ export default function ConfigClient() {
   }
 
   function handleStart() {
+    if (mode === 'edit' && hasChanges) {
+      setShowSaveBeforeStart(true)
+      return
+    }
+    startWorkout()
+  }
+
+  function startWorkout(saveFirst?: boolean) {
     initAudio()
     const workout = buildWorkoutFromState()
+    if (saveFirst && editIndex !== null) updateWorkout(editIndex, workout)
     if (mode === 'new' && saveChecked) addWorkout(workout)
     sessionStorage.setItem('grind-workout', JSON.stringify(workout))
     router.push('/timer')
@@ -118,7 +128,9 @@ export default function ConfigClient() {
   function handleUpdate() {
     if (editIndex === null) return
     updateWorkout(editIndex, buildWorkoutFromState())
-    router.replace('/')
+    setSavedName(name)
+    setSavedSegJson(JSON.stringify(segments))
+    setSavedRounds(rounds)
   }
 
   function handleDeleteConfirm() {
@@ -460,12 +472,64 @@ export default function ConfigClient() {
         <ConfirmDialog
           title="Delete Workout?"
           message={`"${name}" will be removed from your saved workouts.`}
-          confirmLabel="DELETE"
+          confirmLabel="Delete"
           confirmColor={C.red}
-          cancelLabel="KEEP"
+          cancelLabel="Keep"
           onConfirm={handleDeleteConfirm}
           onCancel={() => setShowDeleteConfirm(false)}
         />
+      )}
+
+      {showSaveBeforeStart && (
+        <div
+          onClick={() => setShowSaveBeforeStart(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.54)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: 16,
+          }}
+        >
+          <div onClick={e => e.stopPropagation()} style={{
+            maxWidth: 320,
+            width: '100%',
+            padding: '24px 24px 16px',
+            background: C.surface,
+            borderRadius: 16,
+            border: `1px solid ${C.border}`,
+          }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: C.text, margin: '0 0 6px' }}>
+              Unsaved Changes
+            </h2>
+            <p style={{ fontSize: 14, color: C.textMuted, lineHeight: 1.5, margin: 0 }}>
+              Save changes before starting?
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4, marginTop: 20 }}>
+              <button
+                onClick={() => { setShowSaveBeforeStart(false); startWorkout() }}
+                style={{
+                  background: 'none', border: 'none', padding: '10px 16px', borderRadius: 8,
+                  color: C.textMuted, fontSize: 13, fontWeight: 600, letterSpacing: 0.2, cursor: 'pointer',
+                }}
+              >
+                Just start
+              </button>
+              <button
+                onClick={() => { setShowSaveBeforeStart(false); startWorkout(true) }}
+                style={{
+                  background: 'none', border: 'none', padding: '10px 16px', borderRadius: 8,
+                  color: C.green, fontSize: 13, fontWeight: 600, letterSpacing: 0.2, cursor: 'pointer',
+                }}
+              >
+                Save & start
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {showInfo && description && (
@@ -496,7 +560,7 @@ export default function ConfigClient() {
                 color: C.text, fontSize: 14, fontWeight: 600, cursor: 'pointer', marginTop: 4,
               }}
             >
-              GOT IT
+              Got it
             </button>
           </div>
         </div>

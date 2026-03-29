@@ -66,7 +66,7 @@ export default function HomePage() {
 
         {/* Stats bar */}
         {completedSessions > 0 && (
-          <div style={{ fontSize: 12, color: `${C.textMuted}88`, marginBottom: 24 }}>
+          <div style={{ fontSize: 12, color: `${C.textMuted}88`, marginTop: 16 }}>
             {completedSessions} session{completedSessions !== 1 ? 's' : ''} completed
           </div>
         )}
@@ -78,7 +78,7 @@ export default function HomePage() {
           <section style={{ marginBottom: 32 }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: C.textMuted, letterSpacing: 0.5, marginBottom: 12 }}>
               YOUR WORKOUTS
-              <span style={{ fontWeight: 400, marginLeft: 8, fontSize: 12, color: `${C.textMuted}88` }}>
+              <span style={{ fontWeight: 400, marginLeft: 8, fontSize: 12, color: C.orange }}>
                 {userWorkouts.length}
               </span>
             </div>
