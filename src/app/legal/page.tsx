@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import GrindLogo from '@/components/GrindLogo'
 import ConfirmDialog from '@/components/ConfirmDialog'
@@ -9,7 +9,11 @@ import { C } from '@/lib/colors'
 export default function LegalPage() {
   const router = useRouter()
   const [showPurge, setShowPurge] = useState(false)
-  const [hasData, setHasData] = useState(() => typeof window !== 'undefined' && localStorage.length > 0)
+  const [hasData, setHasData] = useState(false)
+
+  useEffect(() => {
+    setHasData(localStorage.length > 0)
+  }, [])
 
   const h2: React.CSSProperties = { fontSize: 18, fontWeight: 700, color: C.text, margin: '32px 0 12px' }
   const p: React.CSSProperties = { fontSize: 14, color: C.textMuted, lineHeight: 1.6, margin: '0 0 12px' }
