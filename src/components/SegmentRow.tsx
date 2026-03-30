@@ -26,8 +26,8 @@ const MIN = 2
 const MAX = 3600
 
 const TYPE_COLORS = {
-  work: C.orange,
-  rest: '#4ECDC4',
+  work: '#27AE60',
+  rest: '#5B9BD5',
 } as const
 
 interface Props {
@@ -107,7 +107,8 @@ export default function SegmentRow({ id, segment, index, canDelete, onChange, on
         {...attributes}
         {...listeners}
         style={{
-          width: 28,
+          width: 36,
+          minHeight: 44,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -117,7 +118,7 @@ export default function SegmentRow({ id, segment, index, canDelete, onChange, on
           color: C.textMuted,
         }}
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
           <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
           <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
           <circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
