@@ -195,7 +195,7 @@ export default function TimerClient() {
           {round > 0 ? `ROUND ${round} / ${totalRounds}` : ''}
         </div>
         {nextLabel && (
-          <div style={{ fontSize: 12, fontWeight: 500, color: `${textColor}55`, letterSpacing: 0.5 }}>
+          <div style={{ fontSize: 18, fontWeight: 500, color: `${textColor}55`, letterSpacing: 0.5 }}>
             Next: {nextLabel}
           </div>
         )}
