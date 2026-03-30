@@ -20,8 +20,33 @@ export default function LegalPage() {
         <h2 style={h2}>Impressum</h2>
         <p style={p}>
           Aleksandar Velichkovikj<br />
-          Email: dashwhiz@gmail.com
+          Email: <a href="mailto:dashwhiz@gmail.com" style={{ color: C.green, textDecoration: 'none' }}>dashwhiz@gmail.com</a>
         </p>
+        <div style={{ marginBottom: 16 }}>
+          <a
+            href="https://www.linkedin.com/in/aleksandarvelichkovikj"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '8px 14px',
+              background: C.surface,
+              border: `1px solid ${C.border}`,
+              borderRadius: 10,
+              color: C.text,
+              fontSize: 13,
+              fontWeight: 600,
+              textDecoration: 'none',
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#0A66C2">
+              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+            </svg>
+            LinkedIn
+          </a>
+        </div>
         <p style={p}>
           This is a personal, non-commercial project built with love and effort
           to make interval training easier — after not finding what I wanted on the market for free.
@@ -32,8 +57,11 @@ export default function LegalPage() {
           Grind takes your privacy seriously. Here is what you need to know:
         </p>
         <p style={p}>
-          <strong style={{ color: C.text }}>No tracking.</strong> This app does not use cookies, analytics,
-          or any third-party tracking services. No data is sent to any server.
+          <strong style={{ color: C.text }}>Anonymous analytics.</strong> This app uses Google Analytics 4 to
+          collect anonymous usage data such as page views, country of origin, and general device information.
+          IP addresses are anonymized and no personally identifiable information is collected or stored.
+          No advertising features are enabled. You can opt out by using a browser extension or
+          disabling JavaScript.
         </p>
         <p style={p}>
           <strong style={{ color: C.text }}>Local storage only.</strong> Your workouts and preferences are

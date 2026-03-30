@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { formatTime } from '@/lib/utils'
 import { incrementCompletedSessions } from '@/lib/storage'
+import { trackEvent } from '@/lib/analytics'
 import { C } from '@/lib/colors'
 
 export default function CompleteClient() {
@@ -11,7 +12,10 @@ export default function CompleteClient() {
   const searchParams = useSearchParams()
 
   useEffect(() => { router.prefetch('/') }, [router])
-  useEffect(() => { incrementCompletedSessions() }, [])
+  useEffect(() => {
+    incrementCompletedSessions()
+    trackEvent('workout_completed', { workout_name: name, elapsed_seconds: elapsed })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const name = searchParams.get('name') ?? ''
   const elapsed = parseInt(searchParams.get('elapsed') ?? '0') || 0

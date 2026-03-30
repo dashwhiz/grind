@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { formatDuration } from '@/lib/utils'
 import { C } from '@/lib/colors'
 
@@ -39,6 +40,8 @@ export default function SegmentRow({ segment, index, canDelete, onChange, onDele
   const color = TYPE_COLORS[segment.type]
   const atMin = segment.durationSeconds <= MIN
   const atMax = segment.durationSeconds >= MAX
+  const [editing, setEditing] = useState(false)
+  const [editValue, setEditValue] = useState('')
 
   function toggleType() {
     const newType = segment.type === 'work' ? 'rest' : 'work'
@@ -121,16 +124,50 @@ export default function SegmentRow({ segment, index, canDelete, onChange, onDele
         <button style={smallBtn(atMin)} disabled={atMin} onClick={() => changeDuration(-STEP)} aria-label="Decrease">
           −
         </button>
-        <span style={{
-          width: 52,
-          textAlign: 'center',
-          fontFamily: 'var(--font-roboto-mono)',
-          fontSize: 14,
-          fontWeight: 600,
-          color: C.text,
-        }}>
-          {formatDuration(segment.durationSeconds)}
-        </span>
+        {editing ? (
+          <input
+            autoFocus
+            value={editValue}
+            onChange={e => setEditValue(e.target.value.replace(/[^0-9.]/g, ''))}
+            onBlur={() => {
+              const mins = parseFloat(editValue)
+              if (!isNaN(mins) && mins > 0) {
+                const secs = Math.round(mins * 60)
+                onChange(index, { ...segment, durationSeconds: Math.max(MIN, Math.min(MAX, secs)) })
+              }
+              setEditing(false)
+            }}
+            onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }}
+            style={{
+              width: 52,
+              textAlign: 'center',
+              fontFamily: 'var(--font-roboto-mono)',
+              fontSize: 14,
+              fontWeight: 600,
+              color: C.text,
+              background: C.elevated,
+              border: `1px solid ${C.border}`,
+              borderRadius: 6,
+              padding: '2px 0',
+              outline: 'none',
+            }}
+          />
+        ) : (
+          <span
+            onClick={() => { setEditValue((segment.durationSeconds / 60).toFixed(1)); setEditing(true) }}
+            style={{
+              width: 52,
+              textAlign: 'center',
+              fontFamily: 'var(--font-roboto-mono)',
+              fontSize: 14,
+              fontWeight: 600,
+              color: C.text,
+              cursor: 'text',
+            }}
+          >
+            {formatDuration(segment.durationSeconds)}
+          </span>
+        )}
         <button style={smallBtn(atMax)} disabled={atMax} onClick={() => changeDuration(STEP)} aria-label="Increase">
           +
         </button>

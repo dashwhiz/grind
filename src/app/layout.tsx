@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Roboto, Orbitron, Roboto_Mono } from 'next/font/google'
 import BfcacheGuard from '@/components/BfcacheGuard'
+import GoogleAnalytics from '@/components/GoogleAnalytics'
 import './globals.css'
 
 const roboto = Roboto({
@@ -62,6 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${roboto.variable} ${orbitron.variable} ${robotoMono.variable}`} style={{ fontFamily: 'var(--font-roboto), sans-serif' }}>
       <body style={{ fontFamily: 'var(--font-roboto), sans-serif', margin: 0, padding: 0, background: '#0d1117', minHeight: '100vh' }}>
+        <GoogleAnalytics />
         <BfcacheGuard />
         {children}
       </body>

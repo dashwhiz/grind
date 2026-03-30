@@ -12,6 +12,7 @@ import { addWorkout, updateWorkout, deleteWorkout, getWorkoutsSnapshot, getWorko
 import { PRESETS } from '@/lib/presets'
 import { initAudio } from '@/lib/audio'
 import { C } from '@/lib/colors'
+import { trackEvent } from '@/lib/analytics'
 import type { Workout, IntervalSegment } from '@/lib/types'
 
 function TimerIcon() {
@@ -116,12 +117,15 @@ export default function ConfigClient() {
     const workout = buildWorkoutFromState()
     if (saveFirst && editIndex !== null) updateWorkout(editIndex, workout)
     if (mode === 'new' && saveChecked) addWorkout(workout)
+    trackEvent('workout_started', { workout_name: workout.name, mode, rounds: workout.rounds })
     sessionStorage.setItem('grind-workout', JSON.stringify(workout))
     router.push('/timer')
   }
 
   function handleSaveOnly() {
-    addWorkout(buildWorkoutFromState())
+    const workout = buildWorkoutFromState()
+    addWorkout(workout)
+    trackEvent('workout_created', { workout_name: workout.name })
     router.replace('/')
   }
 
@@ -150,6 +154,7 @@ export default function ConfigClient() {
     const workout = buildWorkoutFromState()
     const base = window.location.pathname.replace(/\/config.*$/, '')
     const url = `${window.location.origin}${base}/config?share=${encodeWorkout(workout)}`
+    trackEvent('workout_shared', { workout_name: workout.name })
 
     if (navigator.share) {
       try {

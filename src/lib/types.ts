@@ -14,9 +14,9 @@ export interface Workout {
 }
 
 export const SEGMENT_CONFIG = {
-  work:    { label: 'WORK',      color: '#FF6B35', textColor: '#FFFFFF' },
-  rest:    { label: 'REST',      color: '#4ECDC4', textColor: '#FFFFFF' },
-  prepare: { label: 'GET READY', color: '#FFE66D', textColor: '#000000' },
+  work:    { label: 'WORK',      color: '#27AE60', textColor: '#FFFFFF' },
+  rest:    { label: 'REST',      color: '#5B9BD5', textColor: '#FFFFFF' },
+  prepare: { label: 'GET READY', color: '#F0AD4E', textColor: '#000000' },
 } as const
 
 export const TYPE_LABELS: Record<Workout['type'], string> = {

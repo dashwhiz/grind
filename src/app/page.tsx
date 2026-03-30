@@ -16,6 +16,7 @@ import PresetCard from '@/components/PresetCard'
 import { PRESETS } from '@/lib/presets'
 import { getWorkoutsSnapshot, getWorkoutsServerSnapshot, subscribeWorkouts, getCompletedSessionsSnapshot, getCompletedSessionsServerSnapshot } from '@/lib/storage'
 import { C } from '@/lib/colors'
+import { trackEvent } from '@/lib/analytics'
 
 export default function HomePage() {
   const router = useRouter()
@@ -33,6 +34,7 @@ export default function HomePage() {
   }
 
   function goToPreset(index: number) {
+    trackEvent('preset_selected', { preset_name: PRESETS[index]?.name ?? '' })
     router.push(`/config?preset=${index}`)
   }
 
