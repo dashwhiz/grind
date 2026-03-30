@@ -53,6 +53,7 @@ function loadWorkoutFromSession(): Workout | null {
 export default function TimerClient() {
   const router = useRouter()
   const [showQuit, setShowQuit] = useState(false)
+  const [showReset, setShowReset] = useState(false)
 
   const workout = useMemo(() => loadWorkoutFromSession(), [])
 
@@ -110,7 +111,7 @@ export default function TimerClient() {
         if (status === 'running') pause()
         else if (status === 'idle' || status === 'paused') play()
       } else if (e.code === 'KeyR') {
-        reset()
+        handleResetRequest()
       } else if (e.code === 'Escape') {
         if (status === 'running') { pause(); setShowQuit(true) }
         else if (status === 'paused') setShowQuit(true)
@@ -135,6 +136,25 @@ export default function TimerClient() {
 
   function handleQuitCancel() {
     setShowQuit(false)
+    if (status === 'paused') play()
+  }
+
+  function handleResetRequest() {
+    if (status === 'running' || status === 'paused') {
+      if (status === 'running') pause()
+      setShowReset(true)
+    } else {
+      reset()
+    }
+  }
+
+  function handleResetConfirm() {
+    setShowReset(false)
+    reset()
+  }
+
+  function handleResetCancel() {
+    setShowReset(false)
     if (status === 'paused') play()
   }
 
@@ -233,7 +253,7 @@ export default function TimerClient() {
       {/* Controls + next up */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
-        <button style={circleBtn(56)} onClick={reset} aria-label="Reset">
+        <button style={circleBtn(56)} onClick={handleResetRequest} aria-label="Reset">
           <ResetIcon size={28} />
         </button>
 
@@ -263,6 +283,18 @@ export default function TimerClient() {
           cancelLabel="Keep going"
           onConfirm={handleQuitConfirm}
           onCancel={handleQuitCancel}
+        />
+      )}
+
+      {showReset && (
+        <ConfirmDialog
+          title="Reset Workout?"
+          message="Timer will restart from the beginning."
+          confirmLabel="Reset"
+          confirmColor={C.red}
+          cancelLabel="Continue"
+          onConfirm={handleResetConfirm}
+          onCancel={handleResetCancel}
         />
       )}
     </div>

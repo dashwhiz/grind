@@ -1,7 +1,10 @@
 'use client'
 
-import { useState, useMemo, useSyncExternalStore } from 'react'
+import { useState, useMemo, useRef, useCallback, useSyncExternalStore } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
+import type { DragEndEvent } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
 import RoundsPicker from '@/components/RoundsPicker'
 import SegmentRow from '@/components/SegmentRow'
 import ConfirmDialog from '@/components/ConfirmDialog'
@@ -77,6 +80,24 @@ export default function ConfigClient() {
   const [showSaveBeforeStart, setShowSaveBeforeStart] = useState(false)
   const [showInfo, setShowInfo] = useState(false)
   const [copied, setCopied] = useState(false)
+
+  // Stable IDs for drag-and-drop
+  const nextId = useRef(initialSegments.length + 1)
+  const [segmentIds, setSegmentIds] = useState(() => initialSegments.map((_, i) => `seg-${i + 1}`))
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
+  )
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIndex = segmentIds.indexOf(String(active.id))
+    const newIndex = segmentIds.indexOf(String(over.id))
+    setSegments(prev => arrayMove(prev, oldIndex, newIndex))
+    setSegmentIds(prev => arrayMove(prev, oldIndex, newIndex))
+  }, [segmentIds])
 
   const description = passedWorkout?.description ?? null
 
@@ -176,10 +197,13 @@ export default function ConfigClient() {
   function handleSegmentDelete(index: number) {
     if (segments.length <= 1) return
     setSegments(prev => prev.filter((_, i) => i !== index))
+    setSegmentIds(prev => prev.filter((_, i) => i !== index))
   }
 
   function handleAddSegment() {
+    const id = `seg-${nextId.current++}`
     setSegments(prev => [...prev, { type: 'work', durationSeconds: 30 }])
+    setSegmentIds(prev => [...prev, id])
   }
 
   const outlinedBtnStyle = (disabled: boolean): React.CSSProperties => ({
@@ -348,18 +372,23 @@ export default function ConfigClient() {
             <div style={{ fontSize: 12, fontWeight: 500, color: C.textMuted, letterSpacing: 0.5, marginBottom: 8 }}>
               INTERVALS
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {segments.map((seg, i) => (
-                <SegmentRow
-                  key={i}
-                  segment={seg}
-                  index={i}
-                  canDelete={segments.length > 1}
-                  onChange={handleSegmentChange}
-                  onDelete={handleSegmentDelete}
-                />
-              ))}
-            </div>
+            <DndContext id="segments-dnd" sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={segmentIds} strategy={verticalListSortingStrategy}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {segments.map((seg, i) => (
+                    <SegmentRow
+                      key={segmentIds[i]}
+                      id={segmentIds[i]}
+                      segment={seg}
+                      index={i}
+                      canDelete={segments.length > 1}
+                      onChange={handleSegmentChange}
+                      onDelete={handleSegmentDelete}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
             <button
               onClick={handleAddSegment}
               style={{

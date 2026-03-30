@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { formatDuration } from '@/lib/utils'
 import { C } from '@/lib/colors'
 
@@ -29,6 +31,7 @@ const TYPE_COLORS = {
 } as const
 
 interface Props {
+  id: string
   segment: EditableSegment
   index: number
   canDelete: boolean
@@ -36,12 +39,28 @@ interface Props {
   onDelete: (index: number) => void
 }
 
-export default function SegmentRow({ segment, index, canDelete, onChange, onDelete }: Props) {
+export default function SegmentRow({ id, segment, index, canDelete, onChange, onDelete }: Props) {
   const color = TYPE_COLORS[segment.type]
   const atMin = segment.durationSeconds <= MIN
   const atMax = segment.durationSeconds >= MAX
   const [editing, setEditing] = useState(false)
   const [editValue, setEditValue] = useState('')
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id })
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 10 : undefined,
+  }
 
   function toggleType() {
     const newType = segment.type === 'work' ? 'rest' : 'work'
@@ -70,20 +89,43 @@ export default function SegmentRow({ segment, index, canDelete, onChange, onDele
 
   return (
     <div
+      ref={setNodeRef}
       style={{
+        ...style,
         background: C.surface,
         border: `1px solid ${C.border}`,
         borderRadius: 12,
         borderLeft: `3px solid ${color}`,
-        padding: '8px 10px 8px 12px',
+        padding: '8px 10px 8px 0',
         display: 'flex',
         alignItems: 'center',
         gap: 10,
-        cursor: 'pointer',
       }}
     >
+      {/* Drag handle */}
+      <div
+        {...attributes}
+        {...listeners}
+        style={{
+          width: 28,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'grab',
+          touchAction: 'none',
+          flexShrink: 0,
+          color: C.textMuted,
+        }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
+          <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
+          <circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
+        </svg>
+      </div>
+
       {/* Left: type toggle + label */}
-      <div onClick={toggleType} style={{ flex: 1, minWidth: 0, minHeight: 38, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 4 }}>
+      <div onClick={toggleType} style={{ flex: 1, minWidth: 0, minHeight: 38, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 4, cursor: 'pointer' }}>
         <span style={{
           alignSelf: 'flex-start',
           fontSize: 10,
