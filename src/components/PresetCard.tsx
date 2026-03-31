@@ -48,7 +48,7 @@ export default function PresetCard({
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') onPress();
       }}
-      onMouseEnter={() => setHovered(true)}
+      onMouseEnter={() => { if (window.matchMedia('(hover: hover)').matches) setHovered(true) }}
       onMouseLeave={() => setHovered(false)}
       style={{
         background: hovered ? C.elevated : C.surface,
