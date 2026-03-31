@@ -4,6 +4,11 @@ import { useCallback, useState, useEffect, useSyncExternalStore } from 'react'
 import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable'
 
+import type React from 'react'
+import { useRouter } from 'next/navigation'
+import GrindLogo from '@/components/GrindLogo'
+import Tooltip from '@/components/Tooltip'
+
 const PRESETS_KEY = 'grind-presets-visibility'
 function getPresetsSnapshot() { return localStorage.getItem(PRESETS_KEY) !== 'hide' }
 function getPresetsServerSnapshot() { return true }
@@ -11,10 +16,6 @@ function subscribePresets(cb: () => void) {
   window.addEventListener('storage', cb)
   return () => window.removeEventListener('storage', cb)
 }
-import type React from 'react'
-import GrindLogo from '@/components/GrindLogo'
-import Tooltip from '@/components/Tooltip'
-import { useRouter } from 'next/navigation'
 import PresetCard from '@/components/PresetCard'
 import SortableWorkoutCard from '@/components/SortableWorkoutCard'
 import { PRESETS } from '@/lib/presets'
@@ -48,11 +49,13 @@ export default function HomePage() {
     useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
   )
 
+  const workoutIds = userWorkouts.map((_, i) => `workout-${i}`)
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
     if (!over || active.id === over.id) return
-    const fromIndex = userWorkouts.findIndex(w => w.name === active.id)
-    const toIndex = userWorkouts.findIndex(w => w.name === over.id)
+    const fromIndex = workoutIds.indexOf(String(active.id))
+    const toIndex = workoutIds.indexOf(String(over.id))
     if (fromIndex === -1 || toIndex === -1) return
     reorderWorkouts(fromIndex, toIndex)
   }
@@ -121,12 +124,12 @@ export default function HomePage() {
               </span>
             </div>
             <DndContext id="workouts-dnd" sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-              <SortableContext items={userWorkouts.map(w => w.name)} strategy={rectSortingStrategy}>
+              <SortableContext items={workoutIds} strategy={rectSortingStrategy}>
                 <WorkoutGrid>
                   {userWorkouts.map((w, i) => (
                     <SortableWorkoutCard
-                      key={w.name}
-                      id={w.name}
+                      key={workoutIds[i]}
+                      id={workoutIds[i]}
                       workout={w}
                       accentColor={C.green}
                       onPress={() => goToEdit(i)}
@@ -233,6 +236,8 @@ export default function HomePage() {
       {/* Welcome popup */}
       {showWelcome && (
         <div
+          role="dialog"
+          aria-modal="true"
           onClick={dismissWelcome}
           style={{
             position: 'fixed',

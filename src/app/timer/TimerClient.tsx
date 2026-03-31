@@ -254,7 +254,7 @@ export default function TimerClient() {
 
       {/* Controls + next up */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 32 }} onClick={e => e.stopPropagation()}>
         <Tooltip label={S.tipReset} position="top">
           <button style={circleBtn(56)} onClick={handleResetRequest} aria-label={S.ariaReset}>
             <ResetIcon size={28} />

@@ -40,6 +40,76 @@ function normalizeSegments(segments: IntervalSegment[]): EditableSegment[] {
   return result.length > 0 ? result : DEFAULT_SEGMENTS
 }
 
+const iconBtnStyle: React.CSSProperties = {
+  width: 40, height: 40, background: C.surface, border: `1px solid ${C.border}`,
+  borderRadius: 12, cursor: 'pointer', display: 'flex', alignItems: 'center',
+  justifyContent: 'center', flexShrink: 0,
+}
+
+function IconBtn({ tip, aria, onClick, glow, children }: {
+  tip: string; aria: string; onClick: () => void; glow?: boolean; children: React.ReactNode
+}) {
+  return (
+    <Tooltip label={tip}>
+      <button className={glow ? 'glow-border' : undefined} onClick={onClick} style={iconBtnStyle} aria-label={aria}>
+        {children}
+      </button>
+    </Tooltip>
+  )
+}
+
+function InfoBtn({ size, onClick }: { size: number; onClick: () => void }) {
+  return (
+    <Tooltip label={S.tipInfo}>
+      <button
+        onClick={onClick}
+        style={{
+          width: size, height: size, border: `1px solid ${C.border}`, borderRadius: '50%',
+          background: 'none', color: C.textMuted, fontSize: size < 24 ? 11 : 13, fontWeight: 700,
+          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+        }}
+        aria-label={S.ariaWorkoutInfo}
+      >
+        i
+      </button>
+    </Tooltip>
+  )
+}
+
+function InfoDialog({ name, description, onClose }: { name: string; description: string; onClose: () => void }) {
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.54)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        zIndex: 1000, padding: 16,
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          maxWidth: 360, width: '100%', padding: 24,
+          background: C.surface, borderRadius: 20, border: `1px solid ${C.border}`,
+          display: 'flex', flexDirection: 'column', gap: 12,
+        }}
+      >
+        <div style={{ fontSize: 16, fontWeight: 700, color: C.text }}>{name}</div>
+        <p style={{ fontSize: 14, color: C.textMuted, lineHeight: 1.5, margin: 0 }}>{description}</p>
+        <button
+          onClick={onClose}
+          style={{
+            height: 44, background: C.elevated, border: 'none', borderRadius: 12,
+            color: C.text, fontSize: 14, fontWeight: 600, cursor: 'pointer', marginTop: 4,
+          }}
+        >
+          {S.gotIt}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function resolveWorkoutSync(searchParams: URLSearchParams, userWorkouts: Workout[]): { workout: Workout | null; editIndex: number | null; needsAsync: boolean } {
   const editParam = searchParams.get('edit')
   const presetParam = searchParams.get('preset')
@@ -71,22 +141,6 @@ export default function ConfigClient() {
   const [sharedWorkout, setSharedWorkout] = useState<Workout | null>(null)
   const [shareLoading, setShareLoading] = useState(needsAsync)
 
-  useEffect(() => {
-    const shareParam = searchParams.get('share')
-    if (!shareParam) return
-    decodeWorkout(shareParam).then(w => {
-      setSharedWorkout(w)
-      if (w) {
-        setName(w.name)
-        const segs = normalizeSegments(w.segments)
-        setSegments(segs)
-        setSegmentIds(segs.map((_, i) => `seg-${i + 1}`))
-        setRounds(w.rounds)
-      }
-      setShareLoading(false)
-    })
-  }, [searchParams])
-
   const passedWorkout = isShare ? sharedWorkout : syncWorkout
   const mode: 'new' | 'edit' | 'preset' = !passedWorkout ? 'new' : isShare ? 'new' : editIndex !== null ? 'edit' : 'preset'
 
@@ -95,15 +149,42 @@ export default function ConfigClient() {
   const [name, setName] = useState(passedWorkout?.name ?? 'My Workout')
   const [segments, setSegments] = useState<EditableSegment[]>(initialSegments)
   const [rounds, setRounds] = useState(passedWorkout?.rounds ?? 3)
+  const [savedName, setSavedName] = useState(passedWorkout?.name ?? '')
+  const [savedSegJson, setSavedSegJson] = useState(() => JSON.stringify(initialSegments))
+  const [savedRounds, setSavedRounds] = useState(passedWorkout?.rounds ?? 3)
   const [saveChecked, setSaveChecked] = useState(true)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showSaveBeforeStart, setShowSaveBeforeStart] = useState(false)
   const [showInfo, setShowInfo] = useState(false)
   const [copied, setCopied] = useState(false)
-
-  // Stable IDs for drag-and-drop
   const nextId = useRef(initialSegments.length + 1)
   const [segmentIds, setSegmentIds] = useState(() => initialSegments.map((_, i) => `seg-${i + 1}`))
+
+  useEffect(() => {
+    const shareParam = searchParams.get('share')
+    if (!shareParam) return
+    decodeWorkout(shareParam)
+      .then(w => {
+        setSharedWorkout(w)
+        if (w) {
+          setName(w.name)
+          const segs = normalizeSegments(w.segments)
+          setSegments(segs)
+          setSegmentIds(segs.map((_, i) => `seg-${i + 1}`))
+          nextId.current = segs.length + 1
+          setRounds(w.rounds)
+          setSavedName(w.name)
+          setSavedSegJson(JSON.stringify(segs))
+          setSavedRounds(w.rounds)
+        }
+        setShareLoading(false)
+      })
+      .catch(() => setShareLoading(false))
+  }, [searchParams])
+
+  const description = passedWorkout?.description ?? null
+  const hasChanges = name !== savedName || JSON.stringify(segments) !== savedSegJson || rounds !== savedRounds
+  const total = useMemo(() => segments.reduce((s, seg) => s + seg.durationSeconds, 0) * rounds, [segments, rounds])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -118,22 +199,6 @@ export default function ConfigClient() {
     setSegments(prev => arrayMove(prev, oldIndex, newIndex))
     setSegmentIds(prev => arrayMove(prev, oldIndex, newIndex))
   }, [segmentIds])
-
-  const description = passedWorkout?.description ?? null
-
-  const [savedName, setSavedName] = useState(passedWorkout?.name ?? '')
-  const [savedSegJson, setSavedSegJson] = useState(() => JSON.stringify(initialSegments))
-  const [savedRounds, setSavedRounds] = useState(passedWorkout?.rounds ?? 3)
-
-  const hasChanges =
-    name !== savedName ||
-    JSON.stringify(segments) !== savedSegJson ||
-    rounds !== savedRounds
-
-  const total = useMemo(
-    () => segments.reduce((s, seg) => s + seg.durationSeconds, 0) * rounds,
-    [segments, rounds],
-  )
 
   function buildWorkoutFromState(): Workout {
     return {
@@ -253,76 +318,24 @@ export default function ConfigClient() {
           <GrindLogo onClick={() => router.push('/')} />
           <div style={{ display: 'flex', gap: 8 }}>
             {mode === 'edit' && (
-              <Tooltip label={S.tipDuplicate}>
-                <button
-                  onClick={handleDuplicate}
-                  style={{
-                    width: 40,
-                    height: 40,
-                    background: C.surface,
-                    border: `1px solid ${C.border}`,
-                    borderRadius: 12,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}
-                  aria-label={S.ariaDuplicateWorkout}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill={C.textMuted}>
-                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-                  </svg>
-                </button>
-              </Tooltip>
+              <IconBtn tip={S.tipDuplicate} aria={S.ariaDuplicateWorkout} onClick={handleDuplicate}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill={C.textMuted}>
+                  <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                </svg>
+              </IconBtn>
             )}
             {mode === 'edit' && (
-              <Tooltip label={S.tipShare}>
-                <button
-                  onClick={handleShare}
-                  style={{
-                    width: 40,
-                    height: 40,
-                    background: C.surface,
-                    border: `1px solid ${C.border}`,
-                    borderRadius: 12,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}
-                  aria-label={S.ariaShareWorkout}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill={C.textMuted}>
-                    <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/>
-                  </svg>
-                </button>
-              </Tooltip>
-            )}
-            <Tooltip label={S.tipStartWorkout}>
-              <button
-                className="glow-border"
-                onClick={handleStart}
-                style={{
-                  width: 40,
-                  height: 40,
-                  background: C.surface,
-                  border: `1px solid ${C.border}`,
-                  borderRadius: 12,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                }}
-                aria-label={S.ariaStartWorkout}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill={C.text}>
-                  <path d="M8 5v14l11-7z"/>
+              <IconBtn tip={S.tipShare} aria={S.ariaShareWorkout} onClick={handleShare}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill={C.textMuted}>
+                  <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/>
                 </svg>
-              </button>
-            </Tooltip>
+              </IconBtn>
+            )}
+            <IconBtn tip={S.tipStartWorkout} aria={S.ariaStartWorkout} onClick={handleStart} glow>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill={C.text}>
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </IconBtn>
           </div>
         </div>
         {copied && (
@@ -345,21 +358,7 @@ export default function ConfigClient() {
                 <div style={{ fontSize: 12, fontWeight: 500, color: C.textMuted, letterSpacing: 0.5 }}>
                   {S.workoutName}
                 </div>
-                {description && (
-                  <Tooltip label={S.tipInfo}>
-                    <button
-                      onClick={() => setShowInfo(true)}
-                      style={{
-                        width: 20, height: 20, border: `1px solid ${C.border}`, borderRadius: '50%',
-                        background: 'none', color: C.textMuted, fontSize: 11, fontWeight: 700,
-                        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
-                      }}
-                      aria-label={S.ariaWorkoutInfo}
-                    >
-                      i
-                    </button>
-                  </Tooltip>
-                )}
+                {description && <InfoBtn size={20} onClick={() => setShowInfo(true)} />}
               </div>
               <input
                 value={name}
@@ -383,21 +382,7 @@ export default function ConfigClient() {
           {mode === 'preset' && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{ fontSize: 20, fontWeight: 700, color: C.text }}>{name}</span>
-              {description && (
-                <Tooltip label={S.tipInfo}>
-                  <button
-                    onClick={() => setShowInfo(true)}
-                    style={{
-                      width: 24, height: 24, border: `1px solid ${C.border}`, borderRadius: '50%',
-                      background: 'none', color: C.textMuted, fontSize: 13, fontWeight: 700,
-                      cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
-                    }}
-                    aria-label={S.ariaWorkoutInfo}
-                  >
-                    i
-                  </button>
-                </Tooltip>
-              )}
+              {description && <InfoBtn size={24} onClick={() => setShowInfo(true)} />}
             </div>
           )}
 
@@ -551,89 +536,19 @@ export default function ConfigClient() {
       )}
 
       {showSaveBeforeStart && (
-        <div
-          onClick={() => setShowSaveBeforeStart(false)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.54)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: 16,
-          }}
-        >
-          <div onClick={e => e.stopPropagation()} style={{
-            maxWidth: 320,
-            width: '100%',
-            padding: '24px 24px 16px',
-            background: C.surface,
-            borderRadius: 16,
-            border: `1px solid ${C.border}`,
-          }}>
-            <h2 style={{ fontSize: 16, fontWeight: 700, color: C.text, margin: '0 0 6px' }}>
-              {S.unsavedChangesTitle}
-            </h2>
-            <p style={{ fontSize: 14, color: C.textMuted, lineHeight: 1.5, margin: 0 }}>
-              {S.unsavedChangesMessage}
-            </p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4, marginTop: 20 }}>
-              <button
-                onClick={() => { setShowSaveBeforeStart(false); startWorkout() }}
-                style={{
-                  background: 'none', border: 'none', padding: '10px 16px', borderRadius: 8,
-                  color: C.textMuted, fontSize: 13, fontWeight: 600, letterSpacing: 0.2, cursor: 'pointer',
-                }}
-              >
-                {S.justStart}
-              </button>
-              <button
-                onClick={() => { setShowSaveBeforeStart(false); startWorkout(true) }}
-                style={{
-                  background: 'none', border: 'none', padding: '10px 16px', borderRadius: 8,
-                  color: C.green, fontSize: 13, fontWeight: 600, letterSpacing: 0.2, cursor: 'pointer',
-                }}
-              >
-                {S.saveAndStart}
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmDialog
+          title={S.unsavedChangesTitle}
+          message={S.unsavedChangesMessage}
+          cancelLabel={S.justStart}
+          confirmLabel={S.saveAndStart}
+          confirmColor={C.green}
+          onCancel={() => { setShowSaveBeforeStart(false); startWorkout() }}
+          onConfirm={() => { setShowSaveBeforeStart(false); startWorkout(true) }}
+        />
       )}
 
       {showInfo && description && (
-        <div
-          onClick={() => setShowInfo(false)}
-          style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.54)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            zIndex: 1000, padding: 16,
-          }}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{
-              maxWidth: 360, width: '100%', padding: 24,
-              background: C.surface, borderRadius: 20, border: `1px solid ${C.border}`,
-              display: 'flex', flexDirection: 'column', gap: 12,
-            }}
-          >
-            <div style={{ fontSize: 16, fontWeight: 700, color: C.text }}>{name}</div>
-            <p style={{ fontSize: 14, color: C.textMuted, lineHeight: 1.5, margin: 0 }}>
-              {description}
-            </p>
-            <button
-              onClick={() => setShowInfo(false)}
-              style={{
-                height: 44, background: C.elevated, border: 'none', borderRadius: 12,
-                color: C.text, fontSize: 14, fontWeight: 600, cursor: 'pointer', marginTop: 4,
-              }}
-            >
-              {S.gotIt}
-            </button>
-          </div>
-        </div>
+        <InfoDialog name={name} description={description} onClose={() => setShowInfo(false)} />
       )}
     </div>
   )
