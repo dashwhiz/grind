@@ -34,10 +34,9 @@ export default function HomePage() {
 
   const [showWelcome, setShowWelcome] = useState(false)
 
-  // Check on mount if user has seen the welcome popup — must use effect for SSR safety
   useEffect(() => {
-    if (!localStorage.getItem(WELCOME_KEY)) setShowWelcome(true) // eslint-disable-line react-hooks/set-state-in-effect
-  }, [])
+    if (!localStorage.getItem(WELCOME_KEY)) setShowWelcome(true)
+  }, []) // eslint-disable-line react-hooks/set-state-in-effect -- localStorage not available on server
 
   function dismissWelcome() {
     localStorage.setItem(WELCOME_KEY, '1')

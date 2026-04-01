@@ -24,14 +24,16 @@ export default function NotFound() {
   const [taps, setTaps] = useState(0)
   const [secondsLeft, setSecondsLeft] = useState(DURATION)
   const [best, setBest] = useState(0)
+
+  useEffect(() => { setBest(loadBest()) }, []) // eslint-disable-line react-hooks/set-state-in-effect -- localStorage not available on server
   const [isNewBest, setIsNewBest] = useState(false)
   const interval = useRef<ReturnType<typeof setInterval>>(null)
-
-  useEffect(() => { setBest(loadBest()) }, [])
+  const tapsRef = useRef(0)
 
   const start = useCallback(() => {
     setPhase('playing')
     setTaps(0)
+    tapsRef.current = 0
     setSecondsLeft(DURATION)
     setIsNewBest(false)
 
@@ -49,18 +51,15 @@ export default function NotFound() {
     }, 100)
   }, [])
 
-  // When phase goes to 'done', check best score
   useEffect(() => {
     if (phase !== 'done') return
-    setTaps(current => {
-      const prev = loadBest()
-      if (current > prev) {
-        saveBest(current)
-        setBest(current)
-        setIsNewBest(true)
-      }
-      return current
-    })
+    const current = tapsRef.current
+    const prev = loadBest()
+    if (current > prev) {
+      saveBest(current)
+      setBest(current)
+      setIsNewBest(true)
+    }
   }, [phase])
 
   useEffect(() => {
@@ -68,7 +67,10 @@ export default function NotFound() {
   }, [])
 
   const tap = useCallback(() => {
-    if (phase === 'playing') setTaps(t => t + 1)
+    if (phase === 'playing') {
+      tapsRef.current++
+      setTaps(tapsRef.current)
+    }
   }, [phase])
 
   const tps = phase === 'done' ? (taps / DURATION).toFixed(1) : null
@@ -142,24 +144,41 @@ export default function NotFound() {
 
         {/* Tap Button */}
         {phase === 'idle' && (
-          <button
-            onClick={start}
-            style={{
-              width: '100%',
-              height: 120,
-              borderRadius: 20,
-              border: `2px solid ${C.green}`,
-              background: `${C.green}15`,
-              color: C.green,
-              fontSize: 18,
-              fontWeight: 700,
-              letterSpacing: 1,
-              cursor: 'pointer',
-              transition: 'transform 80ms',
-            }}
-          >
-            START CHALLENGE
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
+            <button
+              onClick={start}
+              style={{
+                width: '100%',
+                height: 120,
+                borderRadius: 20,
+                border: `2px solid ${C.green}`,
+                background: `${C.green}15`,
+                color: C.green,
+                fontSize: 18,
+                fontWeight: 700,
+                letterSpacing: 1,
+                cursor: 'pointer',
+              }}
+            >
+              START CHALLENGE
+            </button>
+            <button
+              onClick={() => router.push('/')}
+              style={{
+                width: '100%',
+                height: 48,
+                borderRadius: 12,
+                border: `1.5px solid ${C.border}`,
+                background: 'transparent',
+                color: C.textMuted,
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              Go home
+            </button>
+          </div>
         )}
 
         {phase === 'playing' && (
